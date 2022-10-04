@@ -1,0 +1,265 @@
+\documentclass[12pt]{article}
+
+\usepackage[latin1]{inputenc}
+
+
+\setlength{\oddsidemargin}{0mm}
+\setlength{\evensidemargin}{0mm}
+\setlength{\textwidth}{164mm}
+\setlength{\textheight}{230mm}
+\setlength{\topmargin}{-3mm}
+\setlength{\parskip}{1mm}
+
+\begin{document}
+
+\begin{center}
+{\Large\bf TP de stéréovision}
+\end{center}
+
+
+
+Pour réaliser le TP, lancez la commande suivante~:
+
+
+{\em  source tp-stereo }
+
+\noindent
+et utilisez {\em bash}.
+
+Attention~: le TP fait intervenir des scripts (.sh) et des commandes
+en ligne. 
+Pour les premiers, il ne faut pas spécifier l'extension des fichiers
+images, alors que cela est nécessaire pour les secondes (en général .tif).
+
+\section{Calcul des images en géométrie épipolaire}
+
+\subsection{sélection de la zone traitée}
+
+Cette sélection peut se faire avec le logiciel {\em xima} qui a déjà
+été lancé sur les images {\em amiens1.tif} et {\em amiens2.tif}. Pour
+le relancer sur d'autres images utilisez la synthaxe suivante, qui
+vous redonne la main pour lancer d'autres commandes~:
+
+{\em xima $<$image gauche$>$ $<$image droite$>$ \&}
+
+Il vous faut noter les coordonnées dans les 2 images de 2 coins
+opposés de la zone sur laquelle vous souhaitez travailler. A ce
+niveau, il n'y a pas besoin d'être très précis sur la position des points. 
+
+
+\subsection{ calcul des matrices de rotation 3D pour le passage de la géométrie originale à la géométrie épipolaire}
+
+Il suffit de lancer le script {\em rotation.sh} sur {\em amiens1} et {\em amiens2}~:
+
+
+{\em rotation.sh amiens1 amiens2}
+
+Ce script fournit en sortie deux fichiers (.mat) qui contiennent les
+paramètres de la rotation~3D des images autour de leur centre optique de
+façon à les placer en géométrie épipolaire. Le calcul de ces matrices
+de rotations est effectué à partir des données de calibrage
+(paramètres intrinsèques et extrinsèques) associés à chaque image
+(fichiers .ori). 
+
+\begin{itemize}
+\item Question 1 : rappelez quelle propriété doit vérifier le plan
+  dans lequel les 
+  deux images sont rééchantil\-lonnées.
+\item Question 2 : à quelle transformation géométrique~2D est équivalente cette
+  rotation du plan image autour du centre optique~?
+\end{itemize}
+
+\subsection{ calcul des coordonnées camera en géométrie épipolaire}
+
+Pour chacune des deux images, le passage des coordonnées des points
+définissant votre zone de 
+travail dans l'image originale aux coordonnées caméra des mêmes points
+dans la géométrie épipolaire va permettre ensuite de définir
+précisément la position et la taille des images en géométrie
+épipolaire. 
+
+{\em image2epipolaire.sh $<$image$>$ $<$x1$>$ $<$y1$>$ $<$x2$>$ $<$y2$>$} 
+
+où  $x_i$, $y_i$ sont les coordonnées des coins opposés du rectangle choisi dans l'image originale. 
+
+\subsection{ rééchantillonnage en géométrie épipolaire de la zone sélectionnées dans les deux images aériennes}
+     
+A partir des données fournies par le script précédent, il est possible
+de définir précisément quelle zone de l'image en géométrie épipolaire
+vous allez rééchantillonner. Il faut passer au script {\em
+  reechantillonnage.sh} la position (en mm) du point en haut à gauche
+dans la géométrie épipolaire, et la taille (en pixels) de l'image
+souhaitée.  
+
+{\em reechantillonnage.sh $<$image originale$>$ $<$image epipolaire$>$ $<$x\_start$>$ $<$y\_start$>$ $<$largeur$>$ $<$hauteur$>$}
+
+{\bf Attention} : la même ordonnée $<$y\_start$>$ doit être choisie pour les
+deux images, en revanche l'abscisse $<$x\_start$>$ est spécifique à
+chaque image. Prenez la même taille pour les deux images en géométrie
+épipolaire (n'hésitez pas à arrondir à la centaine supérieure).
+
+{\bf Attention} : appelez l'image épipolaire gauche~: {\em amiensG.tif}, et
+l'image épipolaire droite~: {\em amiensD.tif},
+
+
+\begin{itemize}
+\item Question 3 : pourquoi doit-on choisir la même ordonnée
+  $<$y\_start$>$ pour 
+  le rééchanillonnage des deux images en géométrie épipolaire ~?
+\end{itemize}
+
+\subsection{vérification de la géométrie épipolaire, et sélection de l'intervalle de disparité}
+
+La spécification de l'intervalle de disparité (disparité du point le
+plus bas et du point le plus haut de la scène) va permettre de limiter
+l'intervalle de recherche entre les images gauche et droite le long
+des lignes épipolaires. 
+
+
+{\em xima $<$imageG.tif$>$ $<$imageD.tif$>$ \&}
+
+{\bf Attention} : les valeurs minimale et maximale de disparité doivent être dans l'intervalle ]-128,128[  
+
+\begin{itemize}
+\item Question 4 : comment cet intervalle de disparité pourrait-il
+  être calculé à partir des données de prise de vue~?
+\end{itemize}
+
+\section{Calcul de l'image de disparité}
+
+\subsection{ corrélation croisée centrée normalisée}
+
+
+Pour chaque point de l'image gauche, on recherche le meilleur
+correspond sur l'image droite en se limitant à l'intervalle de
+disparité donné en entrée. 
+
+
+{\em correlation -i $<$gauche.tif$>$ $<$droite.tif$>$ -r $<$rayon$>$
+  -d $<$dispa\_min$>$ $<$dispa\_max$>$ -o $<$correl.tif$>$ $<$dispa.tif$>$}
+
+\begin{itemize}
+\item Question 5 : quelle information fournit l'image {\em correl.tif}~?
+\item Question 6 : quelle information fournie l'image {\em dispa.tif}~?
+\item Question 7 : quelles sont les conséquences d'un intervalle de
+  disparité mal choisi (trop petit ou trop grand)~?
+\item Question 8 : comment 
+  évolue la carte de disparité {\em dispa.tif} si l'on fait varier le
+  rayon de la fenêtre de corrélation~?
+
+\end{itemize}
+
+\subsection{ seuillage sur le coefficient de corrélation}
+
+Elimination des correspondances pour lesquelles la corrélation n'est
+pas suffisante. 
+
+{\em seuil\_correl $<$dispa.tif$>$ $<$correl.tif$>$ $<$seuil [-1,1]$>$ $<$new-dispa.tif$>$  } 
+
+
+\begin{itemize}
+\item Question 9 : quel compromis êtes-vous obligés de faire en
+  choisissant ce seuil ~? 
+\end{itemize}
+
+\subsection{ corrélation aller-retour}
+
+Symétrisation de la méthode d'appariement des points entre l'image
+gauche et l'image droite. 
+
+{\em correlation\_ar  -i $<$gauche.tif$>$ $<$droite.tif$>$ -r $<$rayon$>$
+  -d $<$dispa\_min$>$ $<$dispa\_max$>$ -o $<$correl.tif$>$ $<$dispa.tif$>$}
+
+\begin{itemize}
+\item Question 10 : expliquez le principe de cette méthode, et dites
+  pourquoi elle 
+  peut permettre de rendre compte des parties cachées.
+\end{itemize}
+
+\subsection{approche hiérarchique avec relaxation}
+
+{\em stereo-relax.sh $<$scene$>$ $<$dispa\_min$>$  $<$dispa\_max$>$ }
+
+\begin{itemize}
+\item Question 11 : pouvez-vous indiquer pour quels types de zone de
+  la scène traitée 
+cette méthode ne fournit pas d'information~: points à $0$ de la carte
+de disparité {\em dispa-amiens.tif}~?
+\end{itemize}
+
+\section{Visualisation du nuage de points  3D}
+
+Ce script commence par boucher les petits trous de la carte de disparité,
+puis fournit un modèle~3D sous la forme d'un nuage de points sur
+lequel a été plaqué une triangulation~:
+
+{\em visu3D.sh $<$dispa-scene.tif$>$ $<$sceneG.tif$>$ $<$profondeur (3)$>$ $<$saut(2)$>$}
+
+Le paramètre {\em profondeur} permet d'augmenter la dynamique de la
+disparité, et le paramètre {\em saut} donne la variation maximale de
+disparité des triangles affichés. 
+
+\section{Géométrie épipolaire et matrice fondamentale}
+
+Vous pouvez récupérer des couples d'images dans le répertoire  {\em
+  images}. Certains couples sont déjà en géométrie 
+épipolaire, d'autres non. A vous de vérifier. 
+
+Estimation de la matrice fondamentale et rectification des images~: {\em rectification.sh $<$scene$>$}
+
+{\bf Attention} : si le nombre de points caractéristiques (points
+SIFT) est trop important, vous pouvez utiliser le script 
+{\em rectification-asift.sh} qui donne moins de points. 
+
+Calcul de la carte de disparité~: {\em stereo-relax.sh}
+
+Visualisation 3D :~{\em visu3D.sh}
+
+
+\section{Amélioration du résultat}
+
+Vous pouvez tester les routines proposées ou utiliser {\em matlab}
+pour traiter ces questions (pensez à sauvegarder les images au format
+TIF et codées sur 1 octet).
+
+\subsection{ pré-traitement (images en géométrie épipolaire) : filtrage passe-bas ou passe-haut, gradient}
+
+\begin{itemize}
+\item Question 12 : quels sont les prétraitements envisageables des
+  images avant la 
+recherche de correspondances denses~? 
+
+{\em  median, moyenne, deriche}
+
+\item Question 13 : quels pré-traitements faut-il éviter~?
+\end{itemize}
+
+\subsection{ post-traitement (carte de disparité) : filtrage,  morphologie  mathématique...}
+
+\begin{itemize}
+\item Question 14 : quels post-traitements permettraient d'améliorer la carte de
+disparité~? 
+
+{\em median, ouvre, ferme }
+
+\item Question 15 : donnez le pseudo-code d'un traitement qui
+  permettrait de boucher 
+  les petits trous de la carte de disparité fournie par {\em
+    stereo-relax}, sans modifier la disparité des points connus.
+\end{itemize}
+
+\subsection{Couple stéréo en couleur }
+
+Le script {\em rectification-couleur.sh} permet de mettre en géométrie
+épipolaire les 3~canaux d'un couple d'images couleur. 
+
+\begin{itemize}
+\item Question 16 : comment montrer ou infirmer l'intérêt d'utiliser
+  ces trois canaux pour la stéréovision~? 
+\end{itemize}
+
+\end{document}
+
+
+ 
+

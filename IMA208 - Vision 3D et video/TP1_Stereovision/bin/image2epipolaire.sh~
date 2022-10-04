@@ -1,0 +1,25 @@
+#! /bin/ksh
+
+#########################################################
+#       Run stereo matching (3 views)                   #
+#                                                       #
+#                                                       #
+#       MAXIM FRADKIN      1-6-99                       #
+#                                                       #
+#########################################################
+if [ $# != 5 ] ; then
+echo " Usage : $0 <image> <x1> <y1> <x2> <y2> "
+exit 1
+fi
+
+
+DISK="."
+LE=$1
+x1=$2
+y1=$3
+x2=$4
+y2=$5
+
+
+env LD_LIBRARY_PATH=/tsi/tp/lib epip_start-ign ${LE}.ori ${LE}.mat $x1 $y1 $x2 $y2 $x2 $y1 $x1 $y2 0.009
+

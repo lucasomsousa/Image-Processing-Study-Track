@@ -1,0 +1,31 @@
+X#!/bin/bash
+
+
+if  [ -d ./bin ]; 
+  then
+    export PATH=./bin:"$PATH"
+fi
+
+
+
+#mkdir $HOME/tp-stereo
+
+ln -s  /usr/lib/x86_64-linux-gnu/libtiff.so.5 libtiff.so.4
+
+export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH":. 
+
+
+ln -s images/amiens-a.tif amiens1.tif
+ln -s images/amiens-a.ori amiens1.ori
+
+ln -s images/amiens-b.tif amiens2.tif
+ln -s images/amiens-b.ori amiens2.ori
+
+
+okular ./stereo.pdf &
+
+which xima 
+
+xima amiens1.tif amiens2.tif > xima.log &
+
+ 

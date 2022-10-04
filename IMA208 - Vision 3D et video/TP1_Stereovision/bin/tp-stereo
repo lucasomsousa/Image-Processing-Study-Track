@@ -1,0 +1,44 @@
+#!/bin/bash
+
+OS=`uname`
+ARCH=`uname -m`
+
+echo /tsi/tp/bin/"$OS"/"$ARCH"
+
+if  [ -d /tsi/tp/bin/"$OS"/"$ARCH" ]; 
+  then 
+    export PATH="$PATH":/tsi/tp/bin/"$OS"/"$ARCH"
+fi
+
+if  [ -d /tsi/tp/bin ]; 
+  then
+    export PATH="$PATH":/tsi/tp/bin
+fi
+
+
+
+
+ln -s  /usr/lib/x86_64-linux-gnu/libtiff.so.5 libtiff.so.4
+
+export  LD_LIBRARY_PATH="$LD_LIBRARY_PATH":. 
+
+
+ln -s /tsi/tp/images/stereo/amiens1.tif 
+ln -s /tsi/tp/images/amiens1.ori 
+
+ln -s /tsi/tp/images/stereo/amiens2.tif 
+ln -s /tsi/tp/images/amiens2.ori 
+
+ln -s /tsi/tp/carlos 
+
+
+#firefox /tsi/tp/TP/Stereo/tp.html &
+
+okular /tsi/tp/TP/Stereo/stereo.pdf &
+
+
+which xima 
+
+xima amiens1.tif amiens2.tif > xima.log &
+alias texmesh='env LD_LIBRARY_PATH=/usr/lib/mesa-diverted/i386-linux-gnu/ /tsi/tp/bin/Linux/x86_64/texmesh'
+
